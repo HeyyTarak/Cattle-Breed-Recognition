@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CattleConnect - Breed Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4A5D23;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #4A5D23 0%, #7A8450 100%);
+        }
+
+        .nav-link {
+            position: relative;
+            padding-bottom: 4px;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #8B4513;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .active-nav::after {
+            width: 100%;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #F5F1E8 0%, #E8E0D0 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .seller-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #4A5D23 0%, #7A8450 100%);
+            color: white;
+        }
+
+        .animal-card {
+            transition: all 0.3s ease;
+            border: 1px solid #E8E0D0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .animal-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-button {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            padding: 0.5rem 1.5rem;
+        }
+
+        .tab-button.active {
+            background-color: #4A5D23;
+            color: white;
+        }
+
+        .upload-area {
+            border: 2px dashed #7A8450;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background-color: #F9F7F2;
+        }
+
+        .upload-area:hover {
+            background-color: #F5F1E8;
+            border-color: #4A5D23;
+        }
+    </style>
+</head>
+
+<body class="bg-earth-cream min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-sm border-b border-earth-dark-cream sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-earth-green flex items-center">
+                        <i class="fas fa-cow mr-2"></i>CattleConnect
+                    </h1>
+                </div>
+                <div class="flex space-x-6">
+                    <button onclick="showPage('home')"
+                        class="nav-link text-earth-green hover:text-earth-brown px-3 py-2 text-sm font-medium active-nav">
+                        <i class="fas fa-home mr-1"></i> Home
+                    </button>
+                    <button onclick="showPage('recognition')"
+                        class="nav-link text-earth-green hover:text-earth-brown px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-robot mr-1"></i> AI Recognition
+                    </button>
+                    <button onclick="showPage('profile')"
+                        class="nav-link text-earth-green hover:text-earth-brown px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-user mr-1"></i> Profile
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home Page -->
+    <div id="home-page" class="page">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Hero Section -->
+            <div class="gradient-bg rounded-2xl p-8 text-white mb-12">
+                <div class="max-w-3xl">
+                    <h2 class="text-4xl font-bold mb-4">Find Premium Cattle & Buffalo Breeds</h2>
+                    <p class="text-lg mb-6">Connect with verified sellers across India and discover the perfect
+                        livestock for your needs with our AI-powered breed recognition.</p>
+                    <button onclick="showPage('recognition')"
+                        class="bg-white text-earth-green font-semibold py-3 px-6 rounded-lg hover:bg-earth-cream transition-colors">
+                        Identify Breed Now <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div class="stats-card text-center">
+                    <div class="text-3xl text-earth-green mb-2">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-earth-green">200+</h3>
+                    <p class="text-earth-brown">Verified Sellers</p>
+                </div>
+                <div class="stats-card text-center">
+                    <div class="text-3xl text-earth-green mb-2">
+                        <i class="fas fa-cow"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-earth-green">5,000+</h3>
+                    <p class="text-earth-brown">Healthy Animals</p>
+                </div>
+                <div class="stats-card text-center">
+                    <div class="text-3xl text-earth-green mb-2">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-earth-green">15+</h3>
+                    <p class="text-earth-brown">States Covered</p>
+                </div>
+            </div>
+
+            <!-- Sellers Grid -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-earth-green">Featured Sellers</h2>
+                    <div class="flex space-x-2">
+                        <button class="bg-earth-dark-cream text-earth-green p-2 rounded-lg">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                        <button class="bg-earth-dark-cream text-earth-green p-2 rounded-lg">
+                            <i class="fas fa-sort"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Seller Card 1 -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden card-hover">
+                        <div
+                            class="h-48 bg-gradient-to-br from-earth-light-green to-earth-green flex items-center justify-center relative">
+                            <div class="text-6xl text-white">👨‍🌾</div>
+                            <div
+                                class="absolute top-4 right-4 bg-white text-earth-green px-3 py-1 rounded-full text-xs font-semibold">
+                                <i class="fas fa-check-circle mr-1"></i> Verified
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-xl font-semibold text-earth-green">Rajesh Kumar</h3>
+                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Top
+                                    Seller</span>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <span class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                                <span class="text-sm text-gray-600 ml-2">4.8 (127 reviews)</span>
+                            </div>
+                            <p class="text-earth-brown mb-2 flex items-center">
+                                <i class="fas fa-map-marker-alt mr-2"></i> Punjab, India
+                            </p>
+                            <p class="text-sm text-gray-600 mb-4 flex items-center">
+                                <i class="fas fa-star mr-2"></i> Specializes in: Holstein, Jersey, Murrah Buffalo
+                            </p>
+                            <button onclick="showSellerInfo('Rajesh Kumar')"
+                                class="w-full bg-earth-green text-white py-2 px-4 rounded-lg hover:bg-earth-light-green transition-colors duration-200 flex items-center justify-center">
+                                <i class="fas fa-user-circle mr-2"></i> View Profile
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Seller Card 2 -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden card-hover">
+                        <div
+                            class="h-48 bg-gradient-to-br from-earth-brown to-amber-700 flex items-center justify-center relative">
+                            <div class="text-6xl text-white">👩‍🌾</div>
+                            <div
+                                class="absolute top-4 right-4 bg-white text-earth-green px-3 py-1 rounded-full text-xs font-semibold">
+                                <i class="fas fa-check-circle mr-1"></i> Verified
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-xl font-semibold text-earth-green">Priya Sharma</h3>
+                                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">New</span>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <span class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                                <span class="text-sm text-gray-600 ml-2">4.9 (89 reviews)</span>
+                            </div>
+                            <p class="text-earth-brown mb-2 flex items-center">
+                                <i class="fas fa-map-marker-alt mr-2"></i> Haryana, India
+                            </p>
+                            <p class="text-sm text-gray-600 mb-4 flex items-center">
+                                <i class="fas fa-star mr-2"></i> Specializes in: Gir, Sahiwal, Nili-Ravi Buffalo
+                            </p>
+                            <button onclick="showSellerInfo('Priya Sharma')"
+                                class="w-full bg-earth-green text-white py-2 px-4 rounded-lg hover:bg-earth-light-green transition-colors duration-200 flex items-center justify-center">
+                                <i class="fas fa-user-circle mr-2"></i> View Profile
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Seller Card 3 -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden card-hover">
+                        <div
+                            class="h-48 bg-gradient-to-br from-green-600 to-earth-green flex items-center justify-center relative">
+                            <div class="text-6xl text-white">🧑‍🌾</div>
+                            <div
+                                class="absolute top-4 right-4 bg-white text-earth-green px-3 py-1 rounded-full text-xs font-semibold">
+                                <i class="fas fa-check-circle mr-1"></i> Verified
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-xl font-semibold text-earth-green">Mohammed Ali</h3>
+                                <span
+                                    class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">Popular</span>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <span class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                                <span class="text-sm text-gray-600 ml-2">4.7 (156 reviews)</span>
+                            </div>
+                            <p class="text-earth-brown mb-2 flex items-center">
+                                <i class="fas fa-map-marker-alt mr-2"></i> Uttar Pradesh, India
+                            </p>
+                            <p class="text-sm text-gray-600 mb-4 flex items-center">
+                                <i class="fas fa-star mr-2"></i> Specializes in: Red Sindhi, Tharparkar, Mehsana Buffalo
+                            </p>
+                            <button onclick="showSellerInfo('Mohammed Ali')"
+                                class="w-full bg-earth-green text-white py-2 px-4 rounded-lg hover:bg-earth-light-green transition-colors duration-200 flex items-center justify-center">
+                                <i class="fas fa-user-circle mr-2"></i> View Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating AI Recognition Button -->
+        <button onclick="showPage('recognition')"
+            class="fixed bottom-6 right-6 bg-earth-green text-white p-4 rounded-full shadow-lg hover:bg-earth-light-green transition-colors duration-200 z-50 flex items-center justify-center">
+            <i class="fas fa-robot text-xl"></i>
+        </button>
+    </div>
+
+    <!-- Breed Recognition Page -->
+    <div id="recognition-page" class="page hidden">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-earth-green mb-4 flex items-center justify-center">
+                    <i class="fas fa-robot mr-3"></i> AI Breed Recognition
+                </h2>
+                <p class="text-earth-brown text-lg">Upload a photo to identify the cattle or buffalo breed</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <div id="upload-section" class="text-center">
+                    <div class="upload-area p-12 mb-6">
+                        <div class="text-5xl mb-4 text-earth-light-green">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-earth-green mb-2">Upload Cattle Photo</h3>
+                        <p class="text-earth-brown mb-6">For best results, use a clear side-view photo</p>
+                        <input type="file" id="breed-image-upload" class="hidden" accept="image/*">
+                        <label for="breed-image-upload"
+                            class="bg-earth-green text-white px-6 py-3 rounded-lg hover:bg-earth-light-green transition-colors duration-200 cursor-pointer inline-block">
+                            <i class="fas fa-upload mr-2"></i> Choose Image
+                        </label>
+                    </div>
+                </div>
+
+                <div id="loading-section" class="text-center hidden">
+                    <div class="loading-spinner mx-auto mb-4"></div>
+                    <h3 class="text-xl font-semibold text-earth-green mb-2">Analyzing Image...</h3>
+                    <p class="text-earth-brown">Our AI is identifying the breed characteristics</p>
+                </div>
+            </div>
+
+            <!-- Recent Scans Section -->
+            <div class="mt-12">
+                <h3 class="text-xl font-semibold text-earth-green mb-6 flex items-center">
+                    <i class="fas fa-history mr-2"></i> Recent Scans
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-lg shadow flex items-center">
+                        <div
+                            class="w-16 h-16 bg-earth-cream rounded-lg flex items-center justify-center text-2xl text-earth-green mr-4">
+                            <i class="fas fa-cow"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-earth-green">Holstein</h4>
+                            <p class="text-sm text-earth-brown">2 days ago</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow flex items-center">
+                        <div
+                            class="w-16 h-16 bg-earth-cream rounded-lg flex items-center justify-center text-2xl text-earth-green mr-4">
+                            <i class="fas fa-cow"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-earth-green">Jersey</h4>
+                            <p class="text-sm text-earth-brown">1 week ago</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow flex items-center">
+                        <div
+                            class="w-16 h-16 bg-earth-cream rounded-lg flex items-center justify-center text-2xl text-earth-green mr-4">
+                            <i class="fas fa-cow"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-earth-green">Murrah</h4>
+                            <p class="text-sm text-earth-brown">2 weeks ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Breed Details Page -->
+    <div id="breed-details-page" class="page hidden">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <button onclick="showPage('home')"
+                class="mb-6 flex items-center text-earth-green hover:text-earth-brown transition-colors duration-200">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Home
+            </button>
+
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="md:flex">
+                    <!-- Breed Image -->
+                    <div class="md:w-1/2">
+                        <div
+                            class="h-96 bg-gradient-to-br from-earth-light-green to-earth-green flex items-center justify-center p-8">
+                            <div class="text-8xl">🐄</div>
+                        </div>
+                    </div>
+
+                    <!-- Breed Info -->
+                    <div class="md:w-1/2 p-8">
+                        <h2 class="text-3xl font-bold text-earth-green mb-6">Holstein Friesian</h2>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Milk Production -->
+                            <div class="stats-card">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-xl text-earth-green mr-2"><i
+                                            class="fas fa-wine-bottle"></i></span>
+                                    <h4 class="font-semibold text-earth-green">Milk Production</h4>
+                                </div>
+                                <p class="text-earth-brown">25-30 liters/day</p>
+                            </div>
+
+                            <!-- Height -->
+                            <div class="stats-card">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-xl text-earth-green mr-2"><i
+                                            class="fas fa-ruler-vertical"></i></span>
+                                    <h4 class="font-semibold text-earth-green">Height</h4>
+                                </div>
+                                <p class="text-earth-brown">145-150 cm</p>
+                            </div>
+
+                            <!-- Weight -->
+                            <div class="stats-card">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-xl text-earth-green mr-2"><i class="fas fa-weight"></i></span>
+                                    <h4 class="font-semibold text-earth-green">Weight</h4>
+                                </div>
+                                <p class="text-earth-brown">580-650 kg</p>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="stats-card">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-xl text-earth-green mr-2"><i
+                                            class="fas fa-indian-rupee-sign"></i></span>
+                                    <h4 class="font-semibold text-earth-green">Price Range</h4>
+                                </div>
+                                <p class="text-earth-brown">₹80,000-₹1,20,000</p>
+                            </div>
+
+                            <!-- Origin -->
+                            <div class="stats-card">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-xl text-earth-green mr-2"><i class="fas fa-globe"></i></span>
+                                    <h4 class="font-semibold text-earth-green">Origin</h4>
+                                </div>
+                                <p class="text-earth-brown">Netherlands</p>
+                            </div>
+
+                            <!-- Lifespan -->
+                            <div class="stats-card">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-xl text-earth-green mr-2"><i class="fas fa-clock"></i></span>
+                                    <h4 class="font-semibold text-earth-green">Lifespan</h4>
+                                </div>
+                                <p class="text-earth-brown">15-20 years</p>
+                            </div>
+
+                            <!-- Best Food -->
+                            <div class="stats-card">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-xl text-earth-green mr-2"><i class="fas fa-seedling"></i></span>
+                                    <h4 class="font-semibold text-earth-green">Best Food</h4>
+                                </div>
+                                <p class="text-earth-brown">Alfalfa, Corn silage</p>
+                            </div>
+
+                            <!-- Dung Production -->
+                            <div class="stats-card">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-xl text-earth-green mr-2"><i class="fas fa-recycle"></i></span>
+                                    <h4 class="font-semibold text-earth-green">Dung/Day</h4>
+                                </div>
+                                <p class="text-earth-brown">30-40 kg</p>
+                            </div>
+                        </div>
+
+                        <!-- Diseases -->
+                        <div class="mt-6 bg-red-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-2">
+                                <span class="text-xl text-red-600 mr-2"><i class="fas fa-briefcase-medical"></i></span>
+                                <h4 class="font-semibold text-red-700">Common Diseases</h4>
+                            </div>
+                            <p class="text-red-600">Mastitis, Milk fever, Ketosis, Lameness</p>
+                        </div>
+
+                        <!-- Find Sellers Button -->
+                        <div class="mt-8">
+                            <button onclick="findSellersForBreed('Holstein Friesian')"
+                                class="w-full bg-earth-green text-white py-3 px-4 rounded-lg hover:bg-earth-light-green transition-colors duration-200 flex items-center justify-center">
+                                <i class="fas fa-store mr-2"></i> Find Sellers with this Breed
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seller Info Page -->
+    <div id="seller-info-page" class="page hidden">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <button onclick="showPage('home')"
+                class="mb-6 flex items-center text-earth-green hover:text-earth-brown transition-colors duration-200">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Sellers
+            </button>
+
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <!-- Seller Profile Header -->
+                <div class="flex flex-col md:flex-row items-center mb-8">
+                    <div class="seller-avatar mb-4 md:mb-0 md:mr-6">
+                        👨‍🌾
+                    </div>
+                    <div class="text-center md:text-left">
+                        <div class="flex flex-col md:flex-row items-center mb-2">
+                            <h2 class="text-3xl font-bold text-earth-green mr-3" id="seller-name">Rajesh Kumar</h2>
+                            <span class="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full mt-2 md:mt-0">
+                                <i class="fas fa-check-circle mr-1"></i> Verified Seller
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-center md:justify-start mb-2">
+                            <span class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                            <span class="text-gray-600 ml-2">4.8 (127 reviews)</span>
+                        </div>
+                        <p class="text-earth-brown flex items-center justify-center md:justify-start">
+                            <i class="fas fa-map-marker-alt mr-2"></i> Punjab, India • <i
+                                class="fas fa-phone ml-3 mr-2"></i> +91 98765 43210
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Sales Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="stats-card text-center">
+                        <h3 class="text-2xl font-bold text-earth-green">156</h3>
+                        <p class="text-earth-brown">Total Cattle Sold</p>
+                    </div>
+                    <div class="stats-card text-center">
+                        <h3 class="text-2xl font-bold text-earth-green">8</h3>
+                        <p class="text-earth-brown">Years Experience</p>
+                    </div>
+                    <div class="stats-card text-center">
+                        <h3 class="text-2xl font-bold text-earth-green">3</h3>
+                        <p class="text-earth-brown">Regions Served</p>
+                    </div>
+                </div>
+
+                <!-- About Seller -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-earth-green mb-4 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i> About
+                    </h3>
+                    <p class="text-earth-brown">
+                        With over 8 years of experience in cattle breeding, Rajesh Kumar specializes in high-quality
+                        Holstein, Jersey, and Murrah Buffalo breeds. All animals are raised with proper care and
+                        nutrition, ensuring healthy and productive livestock for your farm.
+                    </p>
+                </div>
+
+                <!-- Available Animals -->
+                <h3 class="text-xl font-semibold text-earth-green mb-6 flex items-center">
+                    <i class="fas fa-cow mr-2"></i> Available Animals
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="animal-card">
+                        <div
+                            class="h-40 bg-gradient-to-br from-earth-light-green to-earth-green flex items-center justify-center text-5xl text-white">
+                            🐄
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-semibold text-earth-green mb-2">Holstein Heifer</h4>
+                            <p class="text-earth-brown text-sm mb-2 flex items-center">
+                                <i class="fas fa-clock mr-2"></i> Age: 2 years
+                            </p>
+                            <p class="text-earth-brown text-sm mb-2 flex items-center">
+                                <i class="fas fa-wine-bottle mr-2"></i> Milk: 25L/day
+                            </p>
+                            <p class="text-lg font-bold text-earth-green mb-3">₹95,000</p>
+                            <button onclick="contactSeller()"
+                                class="w-full bg-earth-green text-white py-2 px-4 rounded-lg hover:bg-earth-light-green transition-colors duration-200 flex items-center justify-center">
+                                <i class="fas fa-envelope mr-2"></i> Contact Seller
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="animal-card">
+                        <div
+                            class="h-40 bg-gradient-to-br from-earth-brown to-amber-700 flex items-center justify-center text-5xl text-white">
+                            🐃
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-semibold text-earth-green mb-2">Murrah Buffalo</h4>
+                            <p class="text-earth-brown text-sm mb-2 flex items-center">
+                                <i class="fas fa-clock mr-2"></i> Age: 3 years
+                            </p>
+                            <p class="text-earth-brown text-sm mb-2 flex items-center">
+                                <i class="fas fa-wine-bottle mr-2"></i> Milk: 15L/day
+                            </p>
+                            <p class="text-lg font-bold text-earth-green mb-3">₹75,000</p>
+                            <button onclick="contactSeller()"
+                                class="w-full bg-earth-green text-white py-2 px-4 rounded-lg hover:bg-earth-light-green transition-colors duration-200 flex items-center justify-center">
+                                <i class="fas fa-envelope mr-2"></i> Contact Seller
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="animal-card">
+                        <div
+                            class="h-40 bg-gradient-to-br from-green-600 to-earth-green flex items-center justify-center text-5xl text-white">
+                            🐄
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-semibold text-earth-green mb-2">Jersey Cow</h4>
+                            <p class="text-earth-brown text-sm mb-2 flex items-center">
+                                <i class="fas fa-clock mr-2"></i> Age: 4 years
+                            </p>
+                            <p class="text-earth-brown text-sm mb-2 flex items-center">
+                                <i class="fas fa-wine-bottle mr-2"></i> Milk: 20L/day
+                            </p>
+                            <p class="text-lg font-bold text-earth-green mb-3">₹65,000</p>
+                            <button onclick="contactSeller()"
+                                class="w-full bg-earth-green text-white py-2 px-4 rounded-lg hover:bg-earth-light-green transition-colors duration-200 flex items-center justify-center">
+                                <i class="fas fa-envelope mr-2"></i> Contact Seller
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews Section -->
+                <div class="mt-12">
+                    <h3 class="text-xl font-semibold text-earth-green mb-6 flex items-center">
+                        <i class="fas fa-star mr-2"></i> Customer Reviews
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="bg-earth-cream p-4 rounded-lg">
+                            <div class="flex items-center mb-2">
+                                <span class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                                <span class="text-sm text-earth-brown ml-2">Amit Sharma - 2 weeks ago</span>
+                            </div>
+                            <p class="text-earth-brown">Purchased a Holstein heifer from Rajesh. The animal is healthy
+                                and producing 27L milk per day as promised. Great service!</p>
+                        </div>
+                        <div class="bg-earth-cream p-4 rounded-lg">
+                            <div class="flex items-center mb-2">
+                                <span class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                                <span class="text-sm text-earth-brown ml-2">Priya Patel - 1 month ago</span>
+                            </div>
+                            <p class="text-earth-brown">Bought two Murrah buffaloes. Both are in excellent health and
+                                have adapted well to our farm. Will definitely buy again.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile/Dashboard Page - BUYER FOCUSED -->
+    <div id="profile-page" class="page hidden">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h2 class="text-3xl font-bold text-earth-green mb-8 flex items-center">
+                <i class="fas fa-user-circle mr-3"></i> Buyer Dashboard
+            </h2>
+
+            <!-- Buyer Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="stats-card text-center">
+                    <div class="text-3xl text-earth-green mb-2">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-earth-green">12</h3>
+                    <p class="text-earth-brown">Sellers Viewed</p>
+                </div>
+                <div class="stats-card text-center">
+                    <div class="text-3xl text-earth-green mb-2">
+                        <i class="fas fa-bookmark"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-earth-green">5</h3>
+                    <p class="text-earth-brown">Saved Sellers</p>
+                </div>
+                <div class="stats-card text-center">
+                    <div class="text-3xl text-earth-green mb-2">
+                        <i class="fas fa-cow"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-earth-green">3</h3>
+                    <p class="text-earth-brown">Breeds Identified</p>
+                </div>
+                <div class="stats-card text-center">
+                    <div class="text-3xl text-earth-green mb-2">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-earth-green">8</h3>
+                    <p class="text-earth-brown">Seller Inquiries</p>
+                </div>
+            </div>
+
+            <!-- Saved Sellers Section -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold text-earth-green mb-6 flex items-center">
+                    <i class="fas fa-bookmark mr-2"></i> Saved Sellers
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-lg shadow flex items-center">
+                        <div class="w-16 h-16 bg-earth-cream rounded-lg flex items-center justify-center
+                                                    <div class=" w-16 h-16 bg-earth-cream rounded-lg flex items-center
+                            justify-center text-2xl text-earth-green mr-4">
+                            👨‍🌾
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="font-semibold text-earth-green">Rajesh Kumar</h4>
+                            <p class="text-sm text-earth-brown">Punjab, India</p>
+                        </div>
+                        <button class="text-earth-green hover:text-earth-brown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow flex items-center">
+                        <div
+                            class="w-16 h-16 bg-earth-cream rounded-lg flex items-center justify-center text-2xl text-earth-green mr-4">
+                            👩‍🌾
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="font-semibold text-earth-green">Priya Sharma</h4>
+                            <p class="text-sm text-earth-brown">Haryana, India</p>
+                        </div>
+                        <button class="text-earth-green hover:text-earth-brown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold text-earth-green mb-6 flex items-center">
+                    <i class="fas fa-history mr-2"></i> Recent Activity
+                </h3>
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-earth-dark-cream">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-earth-green uppercase tracking-wider">
+                                    Activity
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-earth-green uppercase tracking-wider">
+                                    Date
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-earth-green uppercase tracking-wider">
+                                    Status
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-earth-brown">
+                                    Inquired about Holstein Heifer
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-earth-brown">
+                                    Oct 15, 2023
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        Replied
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-earth-brown">
+                                    Viewed Priya Sharma's profile
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-earth-brown">
+                                    Oct 12, 2023
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        Viewed
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-earth-brown">
+                                    Identified Jersey breed
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-earth-brown">
+                                    Oct 10, 2023
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        Completed
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Account Settings -->
+            <div>
+                <h3 class="text-xl font-semibold text-earth-green mb-6 flex items-center">
+                    <i class="fas fa-cog mr-2"></i> Account Settings
+                </h3>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between py-2">
+                            <div>
+                                <h4 class="font-medium text-earth-green">Email Notifications</h4>
+                                <p class="text-sm text-earth-brown">Receive updates about new sellers and breeds</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" checked>
+                                <div
+                                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-earth-green">
+                                </div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between py-2">
+                            <div>
+                                <h4 class="font-medium text-earth-green">SMS Alerts</h4>
+                                <p class="text-sm text-earth-brown">Get important updates via SMS</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer">
+                                <div
+                                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-earth-green">
+                                </div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between py-2">
+                            <div>
+                                <h4 class="font-medium text-earth-green">Location Services</h4>
+                                <p class="text-sm text-earth-brown">Find sellers near you</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" checked>
+                                <div
+                                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-earth-green">
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <button
+                            class="bg-earth-green text-white py-2 px-6 rounded-lg hover:bg-earth-light-green transition-colors duration-200">
+                            Save Preferences
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'earth-green': '#4A5D23',
+                        'earth-cream': '#F5F1E8',
+                        'earth-brown': '#8B4513',
+                        'earth-light-green': '#7A8450',
+                        'earth-dark-cream': '#E8E0D0',
+                        'earth-dark-green': '#3A4A1C'
+                    }
+                }
+            }
+        }
+
+        // Page Navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.add('hidden');
+            });
+
+            // Show the requested page
+            document.getElementById(`${pageId}-page`).classList.remove('hidden');
+
+            // Update active nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active-nav');
+            });
+
+            // Find and activate the current nav link
+            const activeNav = Array.from(document.querySelectorAll('.nav-link')).find(link => {
+                return link.getAttribute('onclick').includes(pageId);
+            });
+
+            if (activeNav) {
+                activeNav.classList.add('active-nav');
+            }
+        }
+
+        // Show seller info
+        function showSellerInfo(sellerName) {
+            document.getElementById('seller-name').textContent = sellerName;
+            showPage('seller-info');
+        }
+
+        // Find sellers for a specific breed
+        function findSellersForBreed(breedName) {
+            // In a real app, this would filter sellers by breed
+            showPage('home');
+
+            // Show a notification (simulated)
+            alert(`Finding sellers with ${breedName} breed...`);
+        }
+
+        // Contact seller function
+        function contactSeller() {
+            alert('Seller contact form would open here. In a real application, this would allow you to message the seller directly.');
+        }
+
+        function updateBreedDetails(prediction) {
+            // Update the breed name
+            const breedTitle = document.querySelector('#breed-details-page h2');
+            if (breedTitle) breedTitle.textContent = prediction.breed;
+
+            // Update breed information if available
+            if (prediction.info) {
+                // Update milk production
+                const milkElement = document.querySelector('#breed-details-page .stats-card:nth-child(1) p');
+                if (milkElement && prediction.info['Milk Production per day']) {
+                    milkElement.textContent = prediction.info['Milk Production per day'];
+                }
+
+                // Update height
+                const heightElement = document.querySelector('#breed-details-page .stats-card:nth-child(2) p');
+                if (heightElement && prediction.info['Height']) {
+                    heightElement.textContent = prediction.info['Height'];
+                }
+
+                // Update weight
+                const weightElement = document.querySelector('#breed-details-page .stats-card:nth-child(3) p');
+                if (weightElement && prediction.info['Weight']) {
+                    weightElement.textContent = prediction.info['Weight'];
+                }
+
+                // Update price
+                const priceElement = document.querySelector('#breed-details-page .stats-card:nth-child(4) p');
+                if (priceElement && prediction.info['Price']) {
+                    priceElement.textContent = prediction.info['Price'];
+                }
+
+                // Update origin
+                const originElement = document.querySelector('#breed-details-page .stats-card:nth-child(5) p');
+                if (originElement && prediction.info['Origin Place']) {
+                    originElement.textContent = prediction.info['Origin Place'];
+                }
+
+                // Update lifespan
+                const lifespanElement = document.querySelector('#breed-details-page .stats-card:nth-child(6) p');
+                if (lifespanElement && prediction.info['Life Span']) {
+                    lifespanElement.textContent = prediction.info['Life Span'];
+                }
+
+                // Update food
+                const foodElement = document.querySelector('#breed-details-page .stats-card:nth-child(7) p');
+                if (foodElement && prediction.info['Types of food best for that breed']) {
+                    foodElement.textContent = prediction.info['Types of food best for that breed'];
+                }
+
+                // Update dung production
+                const dungElement = document.querySelector('#breed-details-page .stats-card:nth-child(8) p');
+                if (dungElement && prediction.info['Dung per day']) {
+                    dungElement.textContent = prediction.info['Dung per day'];
+                }
+
+                // Update diseases
+                const diseasesElement = document.querySelector('#breed-details-page .bg-red-50 p');
+                if (diseasesElement && prediction.info['Types of diseases']) {
+                    diseasesElement.textContent = prediction.info['Types of diseases'];
+                }
+            }
+
+            // Update confidence if needed
+            const confidenceElement = document.createElement('p');
+            confidenceElement.className = 'text-earth-brown mt-4 font-semibold';
+            confidenceElement.textContent = `AI Confidence: ${(prediction.confidence * 100).toFixed(2)}%`;
+
+            const breedInfoSection = document.querySelector('#breed-details-page .md\\:w-1\\/2');
+            if (breedInfoSection) {
+                breedInfoSection.appendChild(confidenceElement);
+            }
+
+            // Update the find sellers button to use the predicted breed
+            const findSellersButton = document.querySelector('#breed-details-page button');
+            if (findSellersButton) {
+                findSellersButton.setAttribute('onclick', `findSellersForBreed('${prediction.breed}')`);
+            }
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function () {
+            showPage('home');
+
+            // Handle file upload for breed recognition
+            const fileInput = document.getElementById('breed-image-upload');
+            if (fileInput) {
+                fileInput.addEventListener('change', function (e) {
+                    if (e.target.files.length > 0) {
+                        // Show loading state
+                        document.getElementById('upload-section').classList.add('hidden');
+                        document.getElementById('loading-section').classList.remove('hidden');
+
+                        // Upload and process the image
+                        const formData = new FormData();
+                        formData.append('file', e.target.files[0]);
+
+                        fetch('/predict', {
+                            method: 'POST',
+                            body: formData
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.error) {
+                                    alert('Error: ' + data.error);
+                                    document.getElementById('upload-section').classList.remove('hidden');
+                                    document.getElementById('loading-section').classList.add('hidden');
+                                } else {
+                                    // Store the prediction data for use on the breed details page
+                                    sessionStorage.setItem('breedPrediction', JSON.stringify(data));
+                                    showPage('breed-details');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('Failed to process image. Please try again.');
+                                document.getElementById('upload-section').classList.remove('hidden');
+                                document.getElementById('loading-section').classList.add('hidden');
+                            });
+                    }
+                });
+            }
+
+            // Update the breed details page with prediction data if we navigated directly to it
+            if (document.getElementById('breed-details-page')) {
+                const breedPrediction = JSON.parse(sessionStorage.getItem('breedPrediction') || '{}');
+                if (breedPrediction.breed) {
+                    updateBreedDetails(breedPrediction);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
